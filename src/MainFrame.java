@@ -55,7 +55,7 @@ public class MainFrame extends JFrame {
         manage.add(addUser);
 
         JMenuItem listUsers = new JMenuItem("Listar Usuários");
-        listUsers.addActionListener(e -> new UserListFrame(this).setVisible(true));
+        listUsers.addActionListener(e -> new UserListFrame().setVisible(true));
         manage.add(listUsers);
 
 

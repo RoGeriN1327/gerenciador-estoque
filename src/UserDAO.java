@@ -23,7 +23,7 @@ public class UserDAO {
         Map<String, UserRecord> users = new LinkedHashMap<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line = br.readLine(); // header
+            String line = br.readLine();
             while ((line = br.readLine()) != null) {
                 String[] p = line.split(";", -1);
                 if (p.length < 4) continue;

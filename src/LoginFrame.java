@@ -1,6 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.IOException;
 
 public class LoginFrame extends JFrame {
@@ -13,11 +12,13 @@ public class LoginFrame extends JFrame {
         setSize(400, 200);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+
         try {
             userDAO = new UserDAO("users.csv");
         } catch (Exception e) {
             showError("Erro ao acessar arquivo de usuários: " + e.getMessage());
         }
+
         initUI();
     }
 
@@ -64,27 +65,13 @@ public class LoginFrame extends JFrame {
 
         try {
             String hash = Utils.sha256(password);
+            boolean ok = userDAO.authenticate(username, hash);
 
-            try {
-                boolean ok = userDAO.authenticate(username, hash);
-                if (ok) {
-                    new MainFrame(username).setVisible(true);
-                    this.dispose();
-                }
-            } catch (IOException e) {
-
-                if (e.getMessage().startsWith("STATUS_")) {
-                    String st = e.getMessage().replace("STATUS_", "");
-
-                    switch (st) {
-                        case "B" -> showError("Usuário BLOQUEADO.");
-                        case "C" -> showError("Usuário CANCELADO.");
-                        default -> showError("Status inválido.");
-                    }
-                } else {
-                    showError("Falha no login: " + e.getMessage());
-                }
-
+            if (ok) {
+                new MainFrame(username).setVisible(true);
+                dispose();
+            } else {
+                showError("Usuário ou senha incorretos, ou usuário está INATIVO.");
             }
 
         } catch (Exception ex) {
@@ -92,7 +79,7 @@ public class LoginFrame extends JFrame {
         }
     }
 
-    private void showError(String message) {
-        JOptionPane.showMessageDialog(this, message, "Erro", JOptionPane.ERROR_MESSAGE);
+    private void showError(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Erro", JOptionPane.ERROR_MESSAGE);
     }
 }

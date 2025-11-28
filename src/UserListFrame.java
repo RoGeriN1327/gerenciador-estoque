@@ -2,8 +2,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.List;
+import java.util.Map;
 
 public class UserListFrame extends JFrame {
 
@@ -12,14 +11,14 @@ public class UserListFrame extends JFrame {
     private UserDAO userDAO;
 
     public UserListFrame() {
-        setTitle("Usuários Cadastrados");
-        setSize(600, 400);
+        super("Usuários Cadastrados");
+        setSize(600, 350);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
 
-        userDAO = new UserDAO();
+        userDAO = new UserDAO("users.csv");
 
-        model = new DefaultTableModel(new Object[]{"ID", "Nome", "Login", "Status"}, 0) {
+        model = new DefaultTableModel(new Object[]{"Usuário", "Nome", "Status"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -27,79 +26,82 @@ public class UserListFrame extends JFrame {
         };
 
         table = new JTable(model);
-
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-
-        for (int i = 0; i < table.getColumnCount(); i++) {
-            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-        }
-
         table.setRowHeight(28);
+
+        DefaultTableCellRenderer center = new DefaultTableCellRenderer();
+        center.setHorizontalAlignment(SwingConstants.CENTER);
+
+        table.getColumnModel().getColumn(0).setCellRenderer(center);
+        table.getColumnModel().getColumn(1).setCellRenderer(center);
+        table.getColumnModel().getColumn(2).setCellRenderer(center);
+
+        loadUsers();
 
         JScrollPane scroll = new JScrollPane(table);
         add(scroll, BorderLayout.CENTER);
 
-        carregarUsuarios();
+        JPanel bottom = new JPanel();
+        JButton editBtn = new JButton("Editar Selecionado");
+        bottom.add(editBtn);
+        add(bottom, BorderLayout.SOUTH);
 
-        table.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    int row = table.getSelectedRow();
-
-                    if (row >= 0) {
-                        int id = Integer.parseInt(model.getValueAt(row, 0).toString());
-                        editarUsuario(id);
-                    }
-                }
-            }
-        });
+        editBtn.addActionListener(e -> openEditForm());
     }
 
-    private void carregarUsuarios() {
+    private void loadUsers() {
         model.setRowCount(0);
-        List<User> users = userDAO.listAll();
 
-        for (User u : users) {
-            model.addRow(new Object[]{
-                    u.getId(),
-                    u.getName(),
-                    u.getLogin(),
-                    u.getStatus()
-            });
-        }
+        try {
+            Map<String, UserRecord> list = userDAO.loadUsers();
 
-        ajustarLarguraColunas();
-    }
+            for (UserRecord u : list.values()) {
+                
+                String statusText = switch (u.status) {
+                    case "A" -> "ATIVO";
+                    case "B" -> "BLOQUEADO";
+                    case "C" -> "CANCELADO";
+                    default -> "DESCONHECIDO";
+                };
 
-    private void ajustarLarguraColunas() {
-        final int margin = 15;
-        for (int col = 0; col < table.getColumnCount(); col++) {
-            int largura = 75;
-            for (int row = 0; row < table.getRowCount(); row++) {
-                Component comp = table.prepareRenderer(table.getCellRenderer(row, col), row, col);
-                largura = Math.max(comp.getPreferredSize().width + margin, largura);
+                model.addRow(new Object[]{
+                        u.user,
+                        u.nome,
+                        statusText
+                });
             }
-            table.getColumnModel().getColumn(col).setPreferredWidth(largura);
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao carregar usuários:\n" + ex.getMessage());
         }
     }
 
-    private void editarUsuario(int id) {
-        User user = userDAO.findById(id);
-        if (user == null) {
-            JOptionPane.showMessageDialog(this, "Usuário não encontrado!");
+    private void openEditForm() {
+        int row = table.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Selecione um usuário para editar.");
             return;
         }
 
-        UserForm form = new UserForm(user, true);
+        String usuario = (String) model.getValueAt(row, 0);
 
-        form.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosed(WindowEvent e) {
-                carregarUsuarios();
+        try {
+            Map<String, UserRecord> list = userDAO.loadUsers();
+            UserRecord r = list.get(usuario);
+
+            if (r == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Usuário não encontrado.");
+                return;
             }
-        });
 
-        form.setVisible(true);
+            UserEditFrame form = new UserEditFrame(r);
+            form.setVisible(true);
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao abrir edição:\n" + ex.getMessage());
+        }
     }
 }

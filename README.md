@@ -39,10 +39,9 @@ java -cp ../out Main
 
 
 ## Observações de segurança
-- Este projeto guarda hashes SHA-256 das senhas em `users.csv`. Para produção, use *salt* e PBKDF2/Bcrypt/Argon2.
-- CSV é um formato simples e fácil de inspecionar; para grandes sistemas, prefira banco de dados.
+- Este projeto guarda hashes SHA-256 das senhas em `users.csv`.
 
-## Critério de avaliação / Destaques
+## Destaques
 - Interface com Swing (JFrame, JMenuBar, JTable, JDialog)
 - Validações no formulário (campos obrigatórios, números válidos)
 - Tratamento de exceções com mensagens amigáveis ao usuário

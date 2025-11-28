@@ -25,12 +25,18 @@ java -cp ../out Main
 (O comando assume que você está dentro de `src`. Ajuste os caminhos conforme necessário.)
 
 ## Arquivos importantes
+- `Main.java` - Classe principal que inicia o sistema
 - `LoginFrame.java` - Tela de login
 - `MainFrame.java` - Tela principal (menu e CRUD de produtos)
+- `Product.java` - Modelo da entidade Produto
 - `ProductDAO.java` - Leitura/gravação em `products.csv`
-- `UserDAO.java` - Leitura de usuários em `users.csv`
-- `products.csv` - Será criado automaticamente se não existir
-- `users.csv` - Contém usuários; por padrão criado com um usuário: `admin` senha `admin123` (armazenada como SHA-256)
+- `UserDAO.java` - Leitura e manipulação de usuários em `users.csv`
+- `UserListFrame.java` - Tela de listagem de usuários
+- `UserEditFrame.java` - Tela de edição de usuários
+- `Utils.java` - Funções auxiliares (hash SHA-256, validações, parsing, etc.)
+- `products.csv` - Banco local dos produtos; criado automaticamente se não existir
+- `users.csv` - Contém usuários; inclui por padrão o usuário `admin` com senha `admin123` (armazenada como SHA-256)
+
 
 ## Observações de segurança
 - Este projeto guarda hashes SHA-256 das senhas em `users.csv`. Para produção, use *salt* e PBKDF2/Bcrypt/Argon2.

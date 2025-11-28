@@ -74,7 +74,7 @@ public class UserEditFrame extends JFrame {
         add(passField, gbc);
 
         // =============================
-        // CAMPO STATUS (COMBOBOX)
+        // CAMPO STATUS 
         // =============================
         JLabel sL = new JLabel("Status:");
         sL.setFont(labelFont);
